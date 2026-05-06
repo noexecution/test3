@@ -608,8 +608,8 @@ public class MainActivity extends Activity {
 		final Switch screenOnWipeSwitch = new Switch(this);
 		screenOnWipeSwitch.setText(
 			isRussianDevice
-			? "При каждом включении экрана запускать окно с кнопками ✅, ❌. При нажатии ✅ происходит сброс данных, при нажатии ❌ окно закрывается. Работает только если клавиатура включена и назначена по умолчанию."
-			: "Every time the screen is turned on, launch a window with buttons ✅, ❌. Pressing ✅ wipes data, pressing ❌ closes the window. Works only if the keyboard is enabled and set as default"
+			? "При каждом включении экрана запускать окно с кнопками ✅, ❌. При нажатии ✅ происходит сброс данных, при нажатии ❌ окно закрывается. Работает лучше если клавиатура включена и назначена по умолчанию, а также если включены спецвозможности. Потому что это дает право на запуск Activity из фона."
+			: "Every time the screen is turned on, launch a window with buttons ✅, ❌. Pressing ✅ wipes data, pressing ❌ closes the window. Work better if keyboard is enabled and assigned as default, and if accessibility is enabled, because this gives right to start Activity from background."
 		);
 
 
@@ -619,14 +619,23 @@ public class MainActivity extends Activity {
 		screenOnWipeSwitch.setChecked(prefsScreen.getBoolean(KEY_SCREEN_ON_WIPE_PROMPT, false));
 
 		screenOnWipeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					prefsScreen.edit().putBoolean(KEY_SCREEN_ON_WIPE_PROMPT, isChecked).apply();
-					Toast.makeText(MainActivity.this, 
-								   isRussianDevice ? (isChecked ? "Включено" : "Выключено") : (isChecked ? "Enabled" : "Disabled"), 
-								   Toast.LENGTH_SHORT).show();
-				}
-			});
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        prefsScreen.edit().putBoolean(KEY_SCREEN_ON_WIPE_PROMPT, isChecked).apply();
+        
+        Toast.makeText(MainActivity.this, 
+            isRussianDevice ? (isChecked ? "Включено" : "Выключено") : (isChecked ? "Enabled" : "Disabled"), 
+            Toast.LENGTH_SHORT).show();
+
+        if (isChecked) {
+            aetest();
+            if (!accessibilityEnabled) {
+                ais();
+            }
+        }
+    }
+});
+
 
 
 		boolean savedFakeHomeState = prefsIme.getBoolean(KEY_FAKE_HOME, false);
@@ -651,40 +660,37 @@ public class MainActivity extends Activity {
 
 		ae.setText(
 			isRussianDevice
-			? "Запускать фейковое поле ввода пароля при каждом включении экрана / перезагрузке в BFU, чтобы в случае чего вы могли ввести туда код сброса данных. Для запуска используется сервис спецвозможностей вместо клавиатуры. Включайте это как альтернативу клавиатуре, если она не работает у вас на экране блокировки (что бывает на некоторых китайских телефонах, например Realme)."
-			: "Launch a fake password input field upon every screen on / reboot into BFU, so that in case of something you can enter a data reset code there. For launching, an accessibility service is used instead of the keyboard. Enable this as an alternative to the keyboard if it does not work on your lock screen (which happens on some Chinese phones, for example Realme)."
+			? "Запускать фейковое поле ввода пароля при каждом включении экрана / перезагрузке в BFU, чтобы в случае чего вы могли ввести туда код сброса данных. Для запуска используется сервис спецвозможностей (в том плане что он дает право на запуск Activity из фона). Включайте это как альтернативу клавиатуре, если она не работает у вас на экране блокировки (что бывает на некоторых китайских телефонах, например: Realme)."
+			: "Launch a fake password input field upon every screen on / reboot into BFU, so that in case of something you can enter a data reset code there. For launching, an accessibility service is used (in the sense that it gives the right to launch an Activity from the background). Enable this as an alternative to the keyboard if it does not work on your lock screen (which happens on some Chinese phones, for example: Realme)."
 		);
 
 
 
 		aetest();
-		ae.setChecked(accessibilityEnabled);
+		Context dpContextAe = getApplicationContext().createDeviceProtectedStorageContext();
+		boolean savedAeState = dpContextAe.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean("key_fake_password_enabled", false);
+		ae.setChecked(savedAeState);
+
 
 
 		ae.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        Context dpContext = getApplicationContext().createDeviceProtectedStorageContext();
+        dpContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit()
+            .putBoolean("key_fake_password_enabled", isChecked)
+            .apply();
 
-					if (!accessibilityEnabled) {				
-				
-						aetest();
-						ais(); 
-						
-					}
+        if (isChecked) {
+            aetest();
+            if (!accessibilityEnabled) {
+                ais(); 
+            }
+        }
+    }
+});
 
-
-					if (accessibilityEnabled){
-						aetest();
-
-						Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
-						startActivity(intent);
-						finish();
-
-					}
-
-
-				}
-			});
 
 
 		final Switch wipeOnImeSwitch = new Switch(this);
@@ -793,9 +799,9 @@ public class MainActivity extends Activity {
 		readInstructionsButton.setOnClickListener(new View.OnClickListener() {
 
 
-				private static final String in_ru="Это приложение-клавиатура, которое стирает данные с телефона при вводе специального кода. Пригодится на случай если вас кто-то будет принуждать ввести пароль (а это может случиться в любом месте и в любое время, даже в возле парка или тогового центра, и даже в лесу, причем в не зависимости от вашего возраста и пола). Настроить приложение надо заранее, до подобных ситуаций. Это удобная клавиатура и для обычного использования, так что она вам не будет мешать, поддерживает русский, английский, символы и смайлики. Долгое нажатие на \"      \" даёт переключение между языками, обычное — просто пробел, \"!#?\" и \"abc\" — переключение на символы и обратно на буквы, долгое нажатие на \"е\" даёт \"ё\", на \"ь\" даёт \"ъ\", долгое нажатие на \"⌫\" быстро стирает текст, обычное: стирает 1 букву. 🌐 — Ещё 1 вариант переключения языков. Если хотите чтобы под принуждением можно было ввести код сброса данных, работает только на экране блокировки, то заранее настройте приложение так: дайте приложению права Администратора (даёт право сброса данных), задайте код сброса данных и сохраните его, перейдите в настройки клавиатур, включите нашу клавиатуру, установите её кавиатурой по умолчанию, если это доступно в настройках, иначе через выбор клавиатуры на экране блокировки, а затем чтобы вас не могли заставить переключиться на другие клавиатуры — в тех же настройках отключте другие клавиатуры, либо если это нельзя (например они системные), отключите приложения этих клавитур через adb shell pm disable-user --user 0 имя.пакета.нужной.программы. Если не находите имя пакета или даже сама программа скрыта в настройках, то используйте приложение Package Manager (https://f-droid.org/en/packages/com.smartpack.packagemanager) для поиска. Если вы не можете использовать ADB через отладку по USB (например у вас нет компьютера), то используйте отладку по WiFi и программы Shizuku и aShell (https://github.com/RikkaApps/Shizuku/releases и https://f-droid.org/en/packages/in.sunilpaulmathew.ashell). После этого убедитесь, что вы не можете переключиться на другие клавиатуры на экране блокировки. Отключить нужно все. Код сброса срабатывает только на экране блокировки при вводе чистого кода (если в строке только он) и нажатии стрелки Enter (⏎). \n\nВнимание! На некоторых китайских телефонах, например Realme, клавиатура может не отображаться поверх экрана блокировки, ведь там используется системная, поэтому код сброса может не работать, в таком случае используйте последнюю опцию в дополнительных параметрах.\n";
+				private static final String in_ru="Это приложение-клавиатура, которое стирает данные с телефона при вводе специального кода. Пригодится на случай если вас кто-то будет принуждать ввести пароль (а это может случиться в любом месте и в любое время, даже в возле парка или тогового центра, и даже в лесу, причем в не зависимости от вашего возраста и пола). Настроить приложение надо заранее, до подобных ситуаций. Это удобная клавиатура и для обычного использования, так что она вам не будет мешать, поддерживает русский, английский, символы и смайлики. Долгое нажатие на \"      \" даёт переключение между языками, обычное — просто пробел, \"!#?\" и \"abc\" — переключение на символы и обратно на буквы, долгое нажатие на \"е\" даёт \"ё\", на \"ь\" даёт \"ъ\", долгое нажатие на \"⌫\" быстро стирает текст, обычное: стирает 1 букву. 🌐 — Ещё 1 вариант переключения языков. Если хотите чтобы под принуждением можно было ввести код сброса данных (вводить нужно только на экране блокировки, ведь только там он и сработает), — то заранее настройте приложение так: дайте приложению права Администратора (даёт право сброса данных), задайте код сброса данных и сохраните его, перейдите в настройки клавиатур, включите нашу клавиатуру, установите её кавиатурой по умолчанию, если это доступно в настройках, иначе через выбор клавиатуры на экране блокировки, а затем чтобы вас не могли заставить переключиться на другие клавиатуры — в тех же настройках отключте другие клавиатуры, либо если это нельзя (например они системные), отключите приложения этих клавитур через adb shell pm disable-user --user 0 имя.пакета.нужной.программы. Если не находите имя пакета или даже сама программа скрыта в настройках, то используйте приложение Package Manager (https://f-droid.org/en/packages/com.smartpack.packagemanager) для поиска. Если вы не можете использовать ADB через отладку по USB (например у вас нет компьютера), то используйте отладку по WiFi и программы Shizuku и aShell (https://github.com/RikkaApps/Shizuku/releases и https://f-droid.org/en/packages/in.sunilpaulmathew.ashell). После этого убедитесь, что вы не можете переключиться на другие клавиатуры на экране блокировки. Отключить нужно все. Код сброса срабатывает только на экране блокировки при вводе чистого кода (если в строке только он) и нажатии стрелки Enter (⏎). \n\nВнимание! На некоторых китайских телефонах, например Realme, клавиатура может не отображаться поверх экрана блокировки, ведь там используется системная, поэтому код сброса может не работать, в таком случае используйте последнюю опцию в дополнительных параметрах.\n";
 
-				private static final String in_en="This is a keyboard app that erases data from your phone when you enter a special code. It's useful if someone try force you to enter a password (this can happen anywhere and anytime, even near a park or shopping center, or even in the forest, regardless of your age and gender). You should set up the app in advance, before such situations occur. This is a keyboard not only for wipe, for general use too, it is convenient and therefore it won't get in your way. It supports English, Spanish, symbols, and emoji. Long-pressing \"   \" switches between languages, a regular press is just a space, \"!#?\" and \"abc\" switch to symbols and back to letters, long-pressing \"⌫\" quickly erases text, and a regular press erases one letter. 🌐 — Another option for switching languages. If you want in an emergency enter wipe code, work only on the lock screen, configure the app in advance as follows: grant the app Administrator privileges (Administrator rights give the right to reset data), set a reset code and save it, go to the keyboard settings, enable our keyboard, set it as the default keyboard if this action available in the settings, otherwise, by selecting a keyboard on the lock screen. And then to prevent attackers' ability to force you to switch to other keyboards — in the same settings disable other keyboards. Or, if this is not possible (for example, they are system keyboards), disable the applications for these keyboards using adb shell pm disable-user --user 0 package.name.of.needed.program. If you can't find the package name, or even if the program itself is hidden in the settings, use the Package Manager app (https://f-droid.org/en/packages/com.smartpack.packagemanager) to search.  If you can't use ADB via USB debugging (for example, you don't have a computer), then use WiFi debugging and the Shizuku and aShell programs (https://github.com/RikkaApps/Shizuku/releases and https://f-droid.org/en/packages/in.sunilpaulmathew.ashell). After that, make sure you cannot switch to other keyboards on the lock screen. You must disable them all. The reset code work only on lockscreen by entering a clear code (if only this code in current line) and pressing the Enter arrow (⏎). \n\nAttention! On some Chinese phones, for example Realme, the keyboard may not be displayed over the lock screen, since a system one is used there, therefore the reset code may not work, in such a case use the last feature in additional options\n";
+				private static final String in_en="This is a keyboard app that erases data from your phone when you enter a special code. It's useful if someone try force you to enter a password (this can happen anywhere and anytime, even near a park or shopping center, or even in the forest, regardless of your age and gender). You should set up the app in advance, before such situations occur. This is a keyboard not only for wipe, for general use too, it is convenient and therefore it won't get in your way. It supports English, Spanish, symbols, and emoji. Long-pressing \"   \" switches between languages, a regular press is just a space, \"!#?\" and \"abc\" switch to symbols and back to letters, long-pressing \"⌫\" quickly erases text, and a regular press erases one letter. 🌐 — Another option for switching languages. If you want in an emergency enter wipe code (you must enter it only on the lock screen, since that is the only place where it will work), — then configure the app in advance as follows: grant the app Administrator privileges (Administrator rights give the right to reset data), set a reset code and save it, go to the keyboard settings, enable our keyboard, set it as the default keyboard if this action available in the settings, otherwise, by selecting a keyboard on the lock screen. And then to prevent attackers' ability to force you to switch to other keyboards — in the same settings disable other keyboards. Or, if this is not possible (for example, they are system keyboards), disable the applications for these keyboards using adb shell pm disable-user --user 0 package.name.of.needed.program. If you can't find the package name, or even if the program itself is hidden in the settings, use the Package Manager app (https://f-droid.org/en/packages/com.smartpack.packagemanager) to search.  If you can't use ADB via USB debugging (for example, you don't have a computer), then use WiFi debugging and the Shizuku and aShell programs (https://github.com/RikkaApps/Shizuku/releases and https://f-droid.org/en/packages/in.sunilpaulmathew.ashell). After that, make sure you cannot switch to other keyboards on the lock screen. You must disable them all. The reset code work only on lockscreen by entering a clear code (if only this code in current line) and pressing the Enter arrow (⏎). \n\nAttention! On some Chinese phones, for example Realme, the keyboard may not be displayed over the lock screen, since a system one is used there, therefore the reset code may not work, in such a case use the last feature in additional options.\n";
 
 
 			    @Override
@@ -899,8 +905,8 @@ public class MainActivity extends Activity {
 		final Switch usbBlockSwitch = new Switch(this);
 		usbBlockSwitch.setText(
 			isRussianDevice
-			? "Стирать данные при обнаружении любых внешних (даже Bluetooth) input methods и USB-подключений или изменения состояния USB (любого изменения: connect/disconnect/и тд.), за исключением зарядки от обычного зарядного блока. Работает преимущественно если включена клавиатура и назначена по умолчанию"
-			: "Wipe data on detection any external (even Bluetooth) input methods and USB-connections or USB state change (any change: connect/disconnect/other), except charging from ordinary charging brick. Work predominantly if keyboard enabled and assigned by default"
+			? "Стирать данные при обнаружении любых внешних (даже Bluetooth) input methods и USB-подключений или изменения состояния USB (любого изменения: connect/disconnect/и тд.), за исключением зарядки от обычного зарядного блока. Включите это для защиты от атак через USB кабель. Работает лучше если клавиатура включена и назначена по умолчанию, потому что это помогает процессу приложения лучше работать в фоне."
+			: "Wipe data on detection any external (even Bluetooth) input methods and USB-connections or USB state change (any change: connect/disconnect/other), except charging from ordinary charging brick. Enable this to protect against attacks via USB cable. Work better if keyboard enabled and assigned by default because it helps app process work better in background."
 		);
 
 
@@ -964,8 +970,8 @@ public class MainActivity extends Activity {
 		final Switch ScrOFFWipeSwitch = new Switch(this);
 		ScrOFFWipeSwitch.setText(
 			isRussianDevice
-			? "СБРОС ДАННЫХ ПРИ ВЫКЛЮЧЕНИИ ЭКРАНА (работает только если клавиатура включена и назначена по умолчанию)"
-			: "WIPE DATA ON SCREEN OFF (work only if keyboard enabled and assigned by default)"
+			? "СБРОС ДАННЫХ ПРИ ВЫКЛЮЧЕНИИ ЭКРАНА (работает лучше если клавиатура включена и назначена по умолчанию, потому что это помогает процессу приложения лучше работать в фоне)"
+			: "WIPE DATA ON SCREEN OFF (work better if keyboard enabled and assigned by default because it helps app process work better in background)"
 		);
 
 		ScrOFFWipeSwitch.setChecked(prefsWipeScrOFF.getBoolean(KEY_WIPE_SCROFF, false));
@@ -1022,8 +1028,8 @@ public class MainActivity extends Activity {
 		final Switch chargingBlockSwitch = new Switch(this);
 		chargingBlockSwitch.setText(
 			isRussianDevice
-			? "Стирать данные при зарядке. Работает преимущественно если включена клавиатура и назначена по умолчанию. Теоретически, может защитить от сложных USB-exploits. Но отключайте это перед обычной зарядкой или отключайте телефон чтобы остановить это приложение."
-			: "Wipe data on charging. Work predominantly if keyboard enabled and assigned by default. Theoretically, it can protect against complex USB-exploits. But please disable this before regular charging or turn off the phone to temporarily stop this app."
+			? "Стирать данные при зарядке. Может защитить от USB атак, где атакующий притворяется зарядным устройством. Но отключайте эту опцию перед обычной зарядкой или просто отключайте телефон. Пока телефон отключён, приложение не активно. Работает лучше если клавиатура включена и назначена по умолчанию, потому что это помогает процессу приложения лучше работать в фоне."
+			: "Wipe data on charging. May protect against USB attacks where the attacker tries to simulate a charger. But please disable this option before regular charging or just turn off the phone. While the phone is turned off, this app is not active. Work better if keyboard enabled and assigned by default because it helps app process work better in background."
 		);
 
 
@@ -1075,8 +1081,8 @@ public class MainActivity extends Activity {
 		noNetworkWipeSwitch = new Switch(this);
 		noNetworkWipeSwitch.setText(
 			isRussianDevice
-			? "Сброс если нет мобильной сети больше 3 минут и выключен режим полёта. Работает стабильно только если клавиатура включена и назначена по умолчанию. Это способ детектирования пакета Фарадея. Отключайте когда едите там где сеть может пропадать без причины. ! Запускает активити 'черный экран' каждые 30 секунд пока сеть отключена и при выключении экрана чтобы предотвратить сон устроства, потому что если сеть отключена, во время сна нельзя стереть данные. Также блокирует экран при первом запуске для большей защиты. Необходимо разрешение 'Телефон' (READ_PHONE_STATE) для отслеживания сети."
-			: "Reset if there's no mobile network connection for more than 3 minutes and the phone isn't in airplane mode. Works stable only if the keyboard is enabled and set as default. This is a Faraday bug detection method. Disable this when traveling to places where network connection may drop out without reason. ! Starts 'black screen' activity every 30 seconds while network off and when the screen turns for block device sleep, because if network disabled, in sleep wipe data not work. Also locks the screen on first launch for better protection. The 'Phone' (READ_PHONE_STATE) permission is required to monitor the network."
+			? "Сброс если нет мобильной сети больше 3 минут и выключен режим полёта. Это способ детектирования пакета Фарадея. Отключайте когда едите там где сеть может пропадать без причины. ! Запускает активити 'черный экран' каждые 30 секунд пока сеть отключена и при выключении экрана чтобы предотвратить сон устроства, потому что если сеть отключена, во время сна нельзя стереть данные. Также блокирует экран при первом запуске для большей защиты. Необходимо разрешение 'Телефон' (READ_PHONE_STATE) для отслеживания сети. Работает лучше если клавиатура включена и назначена по умолчанию, потому что это помогает процессу приложения лучше работать в фоне и иногда дает право на запуск Activity из фона."
+			: "Reset if there's no mobile network connection for more than 3 minutes and the phone isn't in airplane mode. This is a Faraday bug detection method. Disable this when traveling to places where network connection may drop out without reason. ! Starts 'black screen' activity every 30 seconds while network off and when the screen turns for block device sleep, because if network disabled, in sleep wipe data not work. Also locks the screen on first launch for better protection. The 'Phone' (READ_PHONE_STATE) permission is required to monitor the network. Work better if keyboard enabled and assigned by default because it helps app process work better in background and sometimes may give right to launch Activity from the background."
 		);
 
 		Context dpContextForNetwork = getApplicationContext().createDeviceProtectedStorageContext();
@@ -1143,12 +1149,12 @@ public class MainActivity extends Activity {
 
 					float textPx = (float) Math.sqrt(
 						dm.widthPixels * dm.heightPixels
-					) * 0.023f;
+					) * 0.020f;
 
 					if ("ru".equalsIgnoreCase(Locale.getDefault().getLanguage())) {
 						textPx = (float) Math.sqrt(
 							dm.widthPixels * dm.heightPixels
-						) * 0.021f;
+						) * 0.019f;
 					}
 
 					EsimWipeSwitch.setTextSize(TypedValue.COMPLEX_UNIT_PX, textPx);
