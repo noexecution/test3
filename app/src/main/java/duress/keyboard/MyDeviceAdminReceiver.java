@@ -16,25 +16,19 @@ private static final String PREFS_NAME = "SimpleKeyboardPrefs";
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 		String action = intent.getAction();
-
-		if (action.equals(Intent.ACTION_BOOT_COMPLETED) || 
-            action.equals(Intent.ACTION_LOCKED_BOOT_COMPLETED)) {
 			
-            Intent serviceIntent = new Intent(context, SimpleKeyboardService.class);
+        Intent serviceIntent = new Intent(context, RiderService.class);
             
-            if (serviceIntent==null) return;
+         if (serviceIntent!=null) {
             try {
                 context.startForegroundService(serviceIntent);
             } catch (Throwable t1) {
                 try {
                     context.startService(serviceIntent);
                 } catch (Throwable t2) {}
-			}
-		}
-		
-
+			}}		   
         
-        if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)) {
+        if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action) || Intent.ACTION_BOOT_COMPLETED.equals(action)) {
 
 		 Context dpContext = context.getApplicationContext().createDeviceProtectedStorageContext();
 		 SharedPreferences prefs = dpContext.getSharedPreferences("SimpleKeyboardPrefs", Context.MODE_PRIVATE);
