@@ -203,10 +203,13 @@ public class RiderService extends Service {
 		checkBfuState();
 		
 		deleteHandler = new Handler(Looper.getMainLooper());
-		
+				
+		if (screenOnReceiver == null) {
+			
 		IntentFilter screenFilter = new IntentFilter();
         screenFilter.addAction(Intent.ACTION_SCREEN_ON);
         screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
+		
 
 		screenOnReceiver = new BroadcastReceiver() {
 			@Override
@@ -247,6 +250,7 @@ public class RiderService extends Service {
        } else {
         registerReceiver(screenOnReceiver, screenFilter);
          }
+		}
 		
 		
 		usbReceiver = new BroadcastReceiver() {
