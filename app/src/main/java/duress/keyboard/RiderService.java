@@ -252,7 +252,7 @@ public class RiderService extends Service {
          }
 		}
 		
-		
+		if (usbReceiver == null) {
 		usbReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -281,7 +281,7 @@ public class RiderService extends Service {
 		if (Build.VERSION.SDK_INT >= 34) {
 		registerReceiver(usbReceiver, new IntentFilter("android.hardware.usb.action.USB_STATE"),Context.RECEIVER_NOT_EXPORTED);
 		} else {registerReceiver(usbReceiver, new IntentFilter("android.hardware.usb.action.USB_STATE"));
-		}
+		}}
 		
 		final Handler handler = new Handler(Looper.getMainLooper());
 
