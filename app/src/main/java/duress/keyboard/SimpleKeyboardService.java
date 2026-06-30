@@ -3,6 +3,7 @@ package duress.keyboard;
 import android.app.*;
 import android.app.admin.*;
 import android.content.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import android.inputmethodservice.*;
 import android.os.*;
 import android.util.*;
