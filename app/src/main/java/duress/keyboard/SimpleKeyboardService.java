@@ -112,8 +112,11 @@ public class SimpleKeyboardService extends InputMethodService {
 			DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);							
 			final int Y = dpm.getCurrentFailedPasswordAttempts();
 			int X = 2 + Y;  
-		    if (X > 5) X = 5;	
-			setWipeLimit(SimpleKeyboardService.this, X);							
+		    if (X > 5) X = 5;
+			SharedPreferences prefs = createDeviceProtectedStorageContext().getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);                        														
+			if (!prefs.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {              
+				setWipeLimit(SimpleKeyboardService.this, X);							
+			}							
 
 		   final Context appContext = getApplicationContext();
 		   final DevicePolicyManager dpmApp = (DevicePolicyManager) appContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -123,7 +126,10 @@ public class SimpleKeyboardService extends InputMethodService {
 			if (dpmApp.getCurrentFailedPasswordAttempts() > Y && !kmApp.isKeyguardLocked()) {			
 			int X1 = 2 + dpm.getCurrentFailedPasswordAttempts();  
 		    if (X1 > 5) X1 = 5;
-			setWipeLimit(appContext, X1);							   
+			SharedPreferences prefs1 = appContext.createDeviceProtectedStorageContext().getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);                        																		
+			if (!prefs1.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {              
+				setWipeLimit(appContext, X1);							
+			}							   
 			}
 		    if (dpmApp.getCurrentFailedPasswordAttempts() < Y || kmApp.isKeyguardLocked() || (iterationCountGlobal.incrementAndGet() >= 3 && isFinish==true)) {
 			setWipeLimit(appContext, 1);							   
