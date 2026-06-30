@@ -99,11 +99,10 @@ public class SimpleKeyboardService extends InputMethodService {
 	@Override
     public void onWindowShown() {
         super.onWindowShown();
-		isFinish=false;
 		final KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 						  
 	    if (!km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystem()) {
-
+        isFinish=false;		
 		if (shortCheckRunnable != null) {
 			pollingHandler.removeCallbacks(shortCheckRunnable);
 		    shortCheckRunnable = null;
@@ -112,26 +111,20 @@ public class SimpleKeyboardService extends InputMethodService {
 			DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);							
 			final int Y = dpm.getCurrentFailedPasswordAttempts();
 			int X = 2 + Y;  
-		    if (X > 5) X = 5;
-			SharedPreferences prefs = createDeviceProtectedStorageContext().getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);                        														
-			if (!prefs.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {              
-				setWipeLimit(SimpleKeyboardService.this, X);							
-			}											
+		    if (X > 5) X = 5;	
+			setWipeLimit(SimpleKeyboardService.this, X);							
 
 		   final Context appContext = getApplicationContext();
 		   final DevicePolicyManager dpmApp = (DevicePolicyManager) appContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
 		   final KeyguardManager kmApp = (KeyguardManager) appContext.getSystemService(Context.KEYGUARD_SERVICE);
-		   java.util.concurrent.atomic.AtomicInteger iterationCount = new java.util.concurrent.atomic.AtomicInteger(0);
-		   shortCheckRunnable = () -> {
+		    iterationCountGlobal.set(0); 
+			shortCheckRunnable = () -> {
 			if (dpmApp.getCurrentFailedPasswordAttempts() > Y && !kmApp.isKeyguardLocked()) {			
 			int X1 = 2 + dpm.getCurrentFailedPasswordAttempts();  
 		    if (X1 > 5) X1 = 5;
-			SharedPreferences prefs1 = appContext.createDeviceProtectedStorageContext().getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);                        																		
-			if (!prefs1.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {              
-				setWipeLimit(appContext, X1);							
-			}									   
+			setWipeLimit(appContext, X1);							   
 			}
-		    if (dpmApp.getCurrentFailedPasswordAttempts() < Y || kmApp.isKeyguardLocked() || (iterationCount.incrementAndGet() >= 3 && isFinish==true)) {
+		    if (dpmApp.getCurrentFailedPasswordAttempts() < Y || kmApp.isKeyguardLocked() || (iterationCountGlobal.incrementAndGet() >= 3 && isFinish==true)) {
 			setWipeLimit(appContext, 1);							   
 			} else {
 			pollingHandler.postDelayed(shortCheckRunnable, 700);	
@@ -144,11 +137,15 @@ public class SimpleKeyboardService extends InputMethodService {
     }
 
 	private static volatile boolean isFinish=false;
+	private static final AtomicInteger iterationCountGlobal = new AtomicInteger(0);
 
     @Override
     public void onWindowHidden() {
         super.onWindowHidden();
-		isFinish=true;        
+		if (!isFinish) {
+		iterationCountGlobal.set(1);
+		isFinish=true; 
+		}
     }
 	
 	private final ServiceConnection connection = new ServiceConnection() {
