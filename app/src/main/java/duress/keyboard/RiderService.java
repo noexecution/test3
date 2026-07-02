@@ -116,7 +116,6 @@ public class RiderService extends Service {
 
 	private BroadcastReceiver usbReceiver;
 	private static int a=0;
-	private static final String PREFS_NAME = "SimpleKeyboardPrefs";
 	private static final String KEY_LAYOUT_RU = "layout_ru";
 	private static final String KEY_LAYOUT_EN = "layout_en";
 	private static final String KEY_LAYOUT_SYM = "layout_sym";
