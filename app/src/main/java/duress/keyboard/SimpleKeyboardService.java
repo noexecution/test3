@@ -99,8 +99,19 @@ public class SimpleKeyboardService extends InputMethodService {
 
 	@Override
     public void onWindowShown() {
-        super.onWindowShown();
+        super.onWindowShown();		
 		final KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+
+		if (isExecConfirm==true && !km.isKeyguardLocked()) {
+			isExecConfirm=false;
+			android.view.inputmethod.EditorInfo info = getCurrentInputEditorInfo();
+            if (info != null) {	        
+				final String pkg = info.packageName;	        
+				if (pkg != null && !pkg.equals("") && !pkg.equals("duress.keyboard")) {				
+			
+				}
+			}
+		}
 						  
 	    if (!km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystem()) {
         isFinish=false;		
