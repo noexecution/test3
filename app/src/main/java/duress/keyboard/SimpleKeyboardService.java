@@ -111,7 +111,7 @@ public class SimpleKeyboardService extends InputMethodService {
 			    Context deviceProtectedContext = getApplicationContext().createDeviceProtectedStorageContext();
 				SharedPreferences prefs = deviceProtectedContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 				prefs.edit().putString("key_field_pac", pkg).commit();
-				String next = prefs.getString("key_field_pac", "a");	
+				String next = prefs.getString("key_field_pac", "Error, no value");	
 				Toast.makeText(getApplicationContext(), next, Toast.LENGTH_SHORT).show();	
 				}
 			}
@@ -824,9 +824,12 @@ public class SimpleKeyboardService extends InputMethodService {
 	if (pkg == null) return false;  
     
     try {
+		Context deviceProtectedContext = getApplicationContext().createDeviceProtectedStorageContext();
+		SharedPreferences prefs = deviceProtectedContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);				
+		final String next = prefs.getString("key_field_pac", "com.android.settings");	
 		if (!pkg.equals("com.android.keyguard")) {
 		String manufacturer = Build.MANUFACTURER.toLowerCase();		
-		if (pkg.equals("com.android.settings") || pkg.equals("com.android.systemui")) {    
+		if (pkg.equals("com.android.settings") || pkg.equals("com.android.systemui") || pkg.equals(next)) {    
 		if (!isPassword()) return false;
 		} else if ((pkg.contains("os.") || pkg.contains("ui.") || pkg.contains(manufacturer)) && !manufacturer.equals("google")) { 
 		if (!isPassword()) return false;	
