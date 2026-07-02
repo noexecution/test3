@@ -49,7 +49,7 @@ public class RiderService extends Service {
 
                     if (prefs.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {
                         prefs.edit().putBoolean("emergency_mode_pending_for_keyguard_unlock", false).apply();
-						setWipeLimit(SimpleKeyboardService.this, 3);
+						setWipeLimit(RiderService.this, 3);
                     }
 				}
         
