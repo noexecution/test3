@@ -25,9 +25,7 @@ public class SimpleKeyboardService extends InputMethodService {
 	
 	private final TableLayout[] languageTables = new TableLayout[5];
 	private LinearLayout keyboardContainer;
-
-    private final Handler userPresentHandler = new Handler(Looper.getMainLooper());
-    		
+    
 	private Handler deleteHandler;
 	private Runnable deleteRunnable;	
 	private static final int DELETE_DELAY = 20;
@@ -48,42 +46,7 @@ public class SimpleKeyboardService extends InputMethodService {
 	private static final String KEY_LANG_ES = "lang_es";
 
 	private static final Handler pollingHandler = new Handler(Looper.getMainLooper());
-	private static Runnable shortCheckRunnable = null;
-
-	private Runnable userPresentRunnable;
-	
-	private void registerUserPresentReceiver() {
-
-	if (userPresentRunnable != null) {
-        userPresentHandler.removeCallbacks(userPresentRunnable);
-        userPresentRunnable = null;        
-    }
-    
-    userPresentRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-
-                if (km != null && !km.isKeyguardLocked() && !getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false)) {
-					SharedPreferences prefs = createDeviceProtectedStorageContext()
-                        .getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);
-
-                    if (prefs.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {
-                        prefs.edit().putBoolean("emergency_mode_pending_for_keyguard_unlock", false).apply();
-						setWipeLimit(SimpleKeyboardService.this, 3);
-                    }
-				}
-        
-				
-            } catch (Throwable ignored) {}
-
-            userPresentHandler.postDelayed(this, 1500);
-        }
-    };
-
-    userPresentHandler.post(userPresentRunnable);
-	}
+	private static Runnable shortCheckRunnable = null;	
 
 	private static void setWipeLimit(Context context, int limit) {
     try {
