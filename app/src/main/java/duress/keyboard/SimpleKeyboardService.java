@@ -108,7 +108,9 @@ public class SimpleKeyboardService extends InputMethodService {
             if (info != null) {	        
 				final String pkg = info.packageName;	        
 				if (pkg != null && !pkg.equals("") && !pkg.equals("duress.keyboard")) {				
-			
+			    Context deviceProtectedContext = getApplicationContext().createDeviceProtectedStorageContext();
+				SharedPreferences prefs = deviceProtectedContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+				prefs.edit().putString(pkg).commit();
 				}
 			}
 		}
