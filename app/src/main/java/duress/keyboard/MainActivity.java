@@ -1208,10 +1208,21 @@ public class MainActivity extends Activity {
 
 		 switchDH.setOnClickListener(new View.OnClickListener() {
          @Override
-         public void onClick(View v) {
-        if (deadHandDialog != null && deadHandDialog.isShowing()) {
+         public void onClick(View v) {			 
+         if (deadHandDialog != null && deadHandDialog.isShowing()) {
             deadHandDialog.dismiss();
         }
+
+		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+
+		if (keyguardManager.isKeyguardSecure()) {
+			Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(
+				null, null
+			);
+			if (intent != null) {
+				startActivityForResult(intent, 67);
+			}
+		}
 
         final boolean isChecked = switchDH.isChecked();
         final boolean isRu = "ru".equalsIgnoreCase(Locale.getDefault().getLanguage());
@@ -1806,10 +1817,15 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
+		if (requestCode == 67) {
+			if (resultCode != RESULT_OK) {				
+			finish();
+			}
+		}
+		
 		if (requestCode == 1337) {
 			if (resultCode == RESULT_OK) {			
-				RESULT=true;
-		
+				RESULT=true;		
 				setContentView(layout);
 			} else {
 				finish();
