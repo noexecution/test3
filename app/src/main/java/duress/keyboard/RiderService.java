@@ -243,11 +243,12 @@ public class RiderService extends Service {
 
 	@Override
 	public void onCreate() {
-		super.onCreate();		
+		super.onCreate();
+		TryStartEnforcedService();
 		forceBindAndStart();
+		registerUserPresentReceiver();		
 		startForegroundAlarm();
-		startWatchdogThread();		
-		TryStartEnforcedService();		
+		startWatchdogThread();			
 		registerPowerReceiver();
 		checkBfuState();				
 				
