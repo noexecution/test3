@@ -1296,8 +1296,12 @@ public class MainActivity extends Activity {
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-				if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) {
-			    if (isChecked) openKeyboardSettings();	
+				if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) {			   
+					if (isChecked) {
+					openKeyboardSettings();						
+					if (deadHandDialog != null) deadHandDialog.dismiss();
+					return;	
+					}
 				}			
                 prefsDH.edit().putBoolean(KEY_DEAD_HAND_MODE, isChecked).apply();
                 DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
