@@ -1210,14 +1210,10 @@ public class MainActivity extends Activity {
 
 		 switchDH.setOnClickListener(new View.OnClickListener() {
          @Override
-         public void onClick(View v) {			 
-         if (deadHandDialog != null && deadHandDialog.isShowing()) {
-            deadHandDialog.dismiss();
-        }		
-			 
-		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+         public void onClick(View v) {	
+		 KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 
-		if (keyguardManager.isKeyguardSecure()) {
+		if (keyguardManager!=null && keyguardManager.isKeyguardSecure()) {
 			Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(
 				null, null
 			);
@@ -1226,8 +1222,12 @@ public class MainActivity extends Activity {
 				startActivityForResult(intent, 67);
 			}
 		}
+			 
+         if (deadHandDialog != null && deadHandDialog.isShowing()) {
+            deadHandDialog.dismiss();
+        }		
 
-        final boolean isChecked = switchDH.isChecked();
+		final boolean isChecked = switchDH.isChecked();
         final boolean isRu = "ru".equalsIgnoreCase(Locale.getDefault().getLanguage());
         float density = getResources().getDisplayMetrics().density;
         int p16 = (int) (16 * density + 0.5f);
@@ -1243,13 +1243,13 @@ public class MainActivity extends Activity {
 		if (!isChecked) {
 			titleE = isRu ? "Отключить Режим Мертвой руки" : "Disable Dead Hand Mode";
             messageText.setText(isRu 
-                ? "Вы уверены что хотите отключить режим мертвой руки? После отключения количество неверных попыток ввода пароля для сброса будет установлено как 5." 
-                : "Are you sure you want to disable Dead Hand Mode? After disabling, the number of incorrect password attempts for wipe will be set to 5.");
+                ? "Вы уверены что хотите отключить режим мертвой руки? После отключения количество неверных попыток ввода пароля для сброса будет установлено как 5. Чтобы изменить это, перейдите в настройки Авто-Сброса." 
+                : "Are you sure you want to disable Dead Hand Mode? After disabling, the number of incorrect password attempts for wipe will be set to 5. To change this, go to the Auto-Wipe settings.");
         } else {
 			titleE = isRu ? "Включить Режим Мертвой руки" : "Enable Dead Hand Mode";            
             messageText.setText(isRu 
-                ? "Хотите включить режим мертвой руки?\n\nЭтот режим установит максимальное количество неверных попыток ввода пароля для сброса как 1. Это количество будет сбрасываться до 5 после ввода пароля перед отправкой, если это не DuressPassword и не включен Экстренный Режим, a после нее сразу заново устанавливаться как 1.\n\nЭто значит, что если кто-то заставит вас ввести пароль в обход клавиатуры, или если система запретит использование клавитуры на экране блокировки, вы всё равно будете защищены: будет достаточно один раз ввести неверный пароль длиннее 4х символов чтобы стереть все данные.\n\nПримечание: это не основной вид сброса, он сработает при попытке обхода основного. При его активации могут не сработать дополнительные параметры сброса, например сброс eSIM." 								
-                : "Want to enable Dead Hand Mode?\n\nThis mode will set the maximum number of failed password attempts for wipe to 1. This number will be reset to 5 after entering the password before sending it if this is not DuressPassword and Emergency Mode is not enabled, and after sending it will immediately set it back to 1.\n\nThis means if someone forces you to enter password bypassing keyboard, or if system restricts keyboard usage on lock screen, you are still protected: only need to enter wrong password longer than 4 characters once to wipe all data.\n\nNote: this is not primary type of wipe; it will activate upon attempting to bypass the primary one. Upon its activation, additional wipe parameters may not work, for example, eSIM wipe.");
+                ? "Хотите включить режим мертвой руки?\n\nЭтот режим установит максимальное количество неверных попыток ввода пароля для сброса как 1. Это количество будет сбрасываться до 5 после ввода пароля перед отправкой, если это не DuressPassword и не включен Экстренный Режим (а он может, до следующей разблокировки), a после нее сразу заново устанавливаться как 1.\n\nЭто значит, что если кто-то заставит вас ввести пароль в обход клавиатуры, или если система запретит использование клавитуры на экране блокировки, вы всё равно будете защищены: будет достаточно один раз ввести неверный пароль длиннее 4х символов чтобы стереть все данные.\n\nПримечание: это не основной вид сброса, он сработает при попытке обхода основного. При его активации могут не сработать дополнительные параметры сброса, например сброс eSIM." 								
+                : "Want to enable Dead Hand Mode?\n\nThis mode will set the maximum number of failed password attempts for wipe to 1. This number will be reset to 5 after entering the password before sending it if this is not DuressPassword and Emergency Mode is not enabled (but it can, until next unlock), and after sending it will immediately set it back to 1.\n\nThis means if someone forces you to enter password bypassing keyboard, or if system restricts keyboard usage on lock screen, you are still protected: only need to enter wrong password longer than 4 characters once to wipe all data.\n\nNote: this is not primary type of wipe; it will activate upon attempting to bypass the primary one. Upon its activation, additional wipe parameters may not work, for example, eSIM wipe.");
 			String defaultIme = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
 			if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) {
 				titleE = isRu ? "Ошибка" : "Error";            
@@ -1259,6 +1259,7 @@ public class MainActivity extends Activity {
 			}			
 			
         }
+        
         
         LinearLayout.LayoutParams textLp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
