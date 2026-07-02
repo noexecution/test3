@@ -1241,7 +1241,7 @@ public class MainActivity extends Activity {
 				titleE = isRu ? "Ошибка" : "Error";            
                 messageText.setText(isRu 
                 ? "Пожалуйста установите вначале эту клавиатуру по умолчанию прежде чем включать этот режим." : 
-				"Please, set this keyboard by default before enabling this mode."
+				"Please, set this keyboard by default before enabling this mode.");
 			}			
 			
         }
