@@ -159,8 +159,7 @@ public class SimpleKeyboardService extends InputMethodService {
 		super.onCreate();
 		if (getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false)) {
 		setWipeLimit(this, 1);
-		}
-		registerUserPresentReceiver();
+		}		
 		new Thread(() -> {		  
 		  BindHelper();
 		}).start();	
@@ -402,13 +401,7 @@ public class SimpleKeyboardService extends InputMethodService {
 	}
 
 	@Override
-	public void onDestroy() {
-
-    if (userPresentRunnable != null) {
-        userPresentHandler.removeCallbacks(userPresentRunnable);
-        userPresentRunnable = null;        
-    }
-
+	public void onDestroy() {    
     stopFastDelete();
     super.onDestroy();
 	}
