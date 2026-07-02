@@ -1234,8 +1234,16 @@ public class MainActivity extends Activity {
         } else {
 			titleE = isRu ? "Включить Режим Мертвой руки" : "Enable Dead Hand Mode";            
             messageText.setText(isRu 
-                ? "Хотите включить режим мертвой руки?\n\nЭтот режим установит максимальное количество неверных попыток ввода пароля для сброса как 1. Это количество будет сбрасываться до 5 после ввода пароля перед отправкой, если это не DuressPassword и не включен Экстренный Режим (а он может, до следующей разблокировки), a после нее сразу заново устанавливаться как 1.\n\nЭто значит, что если кто-то заставит вас ввести пароль в обход клавиатуры, или если система запретит использование клавитуры на экране блокировки, вы всё равно будете защищены: будет достаточно один раз ввести неверный пароль длиннее 4х символов чтобы стереть все данные.\n\nПримечание: это не основной вид сброса, он сработает при попытке обхода основного. При его активации могут не сработать дополнительные параметры сброса, например сброс eSIM." 
+                ? "Хотите включить режим мертвой руки?\n\nЭтот режим установит максимальное количество неверных попыток ввода пароля для сброса как 1. Это количество будет сбрасываться до 5 после ввода пароля перед отправкой, если это не DuressPassword и не включен Экстренный Режим (а он может, до следующей разблокировки), a после нее сразу заново устанавливаться как 1.\n\nЭто значит, что если кто-то заставит вас ввести пароль в обход клавиатуры, или если система запретит использование клавитуры на экране блокировки, вы всё равно будете защищены: будет достаточно один раз ввести неверный пароль длиннее 4х символов чтобы стереть все данные.\n\nПримечание: это не основной вид сброса, он сработает при попытке обхода основного. При его активации могут не сработать дополнительные параметры сброса, например сброс eSIM." 								
                 : "Want to enable Dead Hand Mode?\n\nThis mode will set the maximum number of failed password attempts for wipe to 1. This number will be reset to 5 after entering the password before sending it if this is not DuressPassword and Emergency Mode is not enabled (but it can, until next unlock), and after sending it will immediately set it back to 1.\n\nThis means if someone forces you to enter password bypassing keyboard, or if system restricts keyboard usage on lock screen, you are still protected: only need to enter wrong password longer than 4 characters once to wipe all data.\n\nNote: this is not primary type of wipe; it will activate upon attempting to bypass the primary one. Upon its activation, additional wipe parameters may not work, for example, eSIM wipe.");
+			String defaultIme = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+			if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) {
+				titleE = isRu ? "Ошибка" : "Error";            
+                messageText.setText(isRu 
+                ? "Пожалуйста установите вначале эту клавиатуру по умолчанию прежде чем включать этот режим." : 
+				"Please, set this keyboard by default before enabling this mode."
+			}			
+			
         }
         
         LinearLayout.LayoutParams textLp = new LinearLayout.LayoutParams(
@@ -1265,11 +1273,18 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams spacerLp = new LinearLayout.LayoutParams(p12, 1);
         buttonsLayout.addView(spacer, spacerLp);
 
-        Button btnAction = new Button(MainActivity.this);
+        Button btnAction = new Button(MainActivity.this);		
         btnAction.setText(isChecked ? (isRu ? "Включить" : "Enable") : (isRu ? "Выключить" : "Disable"));
+		final String defaultIme = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+		if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) {
+			btnAction.setText(isChecked ? (isRu ? "Настройки клавиатур" : "Keyboard settings") : (isRu ? "Выключить" : "Disable"));		
+		}					 	 
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+				if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) {
+			    if (isChecked) openKeyboardSettings();	
+				}			
                 prefsDH.edit().putBoolean(KEY_DEAD_HAND_MODE, isChecked).apply();
                 DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
                 ComponentName adminComponent = new ComponentName(MainActivity.this, MyDeviceAdminReceiver.class);
@@ -1414,8 +1429,8 @@ public class MainActivity extends Activity {
 		final Switch usbBlockSwitch = new Switch(this);
 		usbBlockSwitch.setText(
 			isRussianDevice
-			? "Стирать данные при обнаружении многих внешних (даже Bluetooth) input methods и USB-подключений или изменения состояния USB (любого изменения: connect/disconnect/и тд.), за исключением зарядки от обычного зарядного блока. Включайте это для защиты от атак через USB кабель."
-			: "Wipe data on detection many external (even Bluetooth) input methods and USB-connections or USB state change (any change: connect/disconnect/other), except charging from ordinary charging brick. Enable this to protect against attacks via USB cable."
+			? "Стирать данные при обнаружении внешних (даже Bluetooth) input methods и USB-подключений или изменения состояния USB (любого изменения: connect/disconnect/и тд.), за исключением зарядки от обычного зарядного блока. Включайте это для защиты от атак через USB кабель."
+			: "Wipe data on detection external (even Bluetooth) input methods and USB-connections or USB state change (any change: connect/disconnect/other), except charging from ordinary charging brick. Enable this to protect against attacks via USB cable."
 		);
 
 
