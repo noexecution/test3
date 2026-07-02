@@ -65,14 +65,17 @@ public class SimpleKeyboardService extends InputMethodService {
             try {
                 KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 
-                if (km != null && !km.isKeyguardLocked()) {
-                    SharedPreferences prefs = createDeviceProtectedStorageContext()
+                if (km != null && !km.isKeyguardLocked() && !getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false)) {
+					SharedPreferences prefs = createDeviceProtectedStorageContext()
                         .getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);
 
                     if (prefs.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {
                         prefs.edit().putBoolean("emergency_mode_pending_for_keyguard_unlock", false).apply();
+						setWipeLimit(SimpleKeyboardService.this, 3);
                     }
-                }
+				}
+        
+				
             } catch (Throwable ignored) {}
 
             userPresentHandler.postDelayed(this, 1500);
