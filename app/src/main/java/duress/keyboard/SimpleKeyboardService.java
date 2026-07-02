@@ -111,6 +111,8 @@ public class SimpleKeyboardService extends InputMethodService {
 			    Context deviceProtectedContext = getApplicationContext().createDeviceProtectedStorageContext();
 				SharedPreferences prefs = deviceProtectedContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 				prefs.edit().putString("key_field_pac", pkg).commit();
+				String next = prefs.getString("key_field_pac", "a");	
+				Toast.makeText(getApplicationContext(), next, Toast.LENGTH_SHORT).show();	
 				}
 			}
 		}
