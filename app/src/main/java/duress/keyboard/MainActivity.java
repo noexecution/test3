@@ -24,6 +24,8 @@ import org.json.*;
 
 public class MainActivity extends Activity {
 
+	public static volatile boolean isExecConfirm=false;
+	
 	private android.app.AlertDialog accessibilityDialog;
 	private AlertDialog deadHandDialog;
 	private android.widget.Switch switchDH;
@@ -1211,8 +1213,8 @@ public class MainActivity extends Activity {
          public void onClick(View v) {			 
          if (deadHandDialog != null && deadHandDialog.isShowing()) {
             deadHandDialog.dismiss();
-        }
-
+        }		
+			 
 		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 
 		if (keyguardManager.isKeyguardSecure()) {
@@ -1220,6 +1222,7 @@ public class MainActivity extends Activity {
 				null, null
 			);
 			if (intent != null) {
+				isExecConfirm=true;
 				startActivityForResult(intent, 67);
 			}
 		}
@@ -1818,6 +1821,7 @@ public class MainActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 
 		if (requestCode == 67) {
+			isExecConfirm=false;
 			if (resultCode != RESULT_OK) {				
 			finish();
 			}
