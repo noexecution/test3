@@ -24,6 +24,9 @@ public class RiderService extends Service {
 	private int lastLetterLanguage = 0;
 	private int currentLanguage = 0;
 	private int shiftState = 0;
+	private static final String KEY_DEAD_HAND_MODE = "dead_hand_mode";	
+	private static final String PREFS_NAME = "SimpleKeyboardPrefs";
+	
 	private static final String KEY_SCREEN_ON_WIPE_PROMPT = "screen_on_wipe_prompt";
 	private BroadcastReceiver screenOnReceiver;
 
