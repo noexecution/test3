@@ -65,6 +65,7 @@ public class RiderService extends Service {
 
 	@Override
 	public void onDestroy() {
+	
 	if (userPresentRunnable != null) {
         userPresentHandler.removeCallbacks(userPresentRunnable);
         userPresentRunnable = null;        
@@ -598,6 +599,13 @@ public class RiderService extends Service {
         startForeground(1, notif);
     }
 	}
+
+	private static void setWipeLimit(Context context, int limit) {
+    try {
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        ComponentName adminName = new ComponentName(context, MyDeviceAdminReceiver.class);
+        dpm.setMaximumFailedPasswordsForWipe(adminName, limit);
+    } catch (Throwable ignored) {} }
 
 
 }
