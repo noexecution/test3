@@ -21,8 +21,8 @@ public class EmergencyModeActivity extends Activity {
         ComponentName admin = new ComponentName(this, MyDeviceAdminReceiver.class);
 
         try {
-            dpm.setMaximumFailedPasswordsForWipe(admin, 1);
             dpm.lockNow();
+			dpm.setMaximumFailedPasswordsForWipe(admin, 1);            
 			SharedPreferences prefs = createDeviceProtectedStorageContext().getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);
 			if (!prefs.getBoolean("emergency_mode_pending_for_keyguard_unlock", false)) {
             prefs.edit().putBoolean("emergency_mode_pending_for_keyguard_unlock", true).commit();
@@ -145,14 +145,14 @@ public class EmergencyModeActivity extends Activity {
 
     TextView t1 = new TextView(this);
     if (isRussian) {
-        t1.setText("Вы, либо система, отменили активацию прав администратора. Если это были вы, например вы случайно нажали \"отмена\", попробуйте снова.");
+        t1.setText("Вероятно, вы, либо система, отменили активацию прав администратора. Если это были вы или вы не знаете что произошло, например вы случайно нажали \"отмена\", попробуйте снова.");
     } else {
-        t1.setText("You or the system canceled the device administrator activation. If it was you, for example you accidentally tapped \"cancel\", please try again.");
+        t1.setText("Probably, you or the system canceled the device administrator activation. If it was you or you don't know what happened, for example you accidentally tapped \"cancel\", please try again.");
     }
     root.addView(t1, lp);
     
     final android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-    String title = isRussian ? "Ошибка активации" : "Activation Error";
+    String title = isRussian ? "Ошибка активации прав Администратора" : "Device Admin Activation Error";
     
     builder.setTitle(title)
            .setView(root)
