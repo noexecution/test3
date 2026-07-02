@@ -1132,7 +1132,7 @@ public class MainActivity extends Activity {
 									.setPositiveButton("OK", null)
 									.create();
 
-								infoDialog.show();
+								infoDialog.show();								
 
 								Window window = infoDialog.getWindow();
 								if (window != null) {
@@ -1298,8 +1298,9 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 				if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) {			   
 					if (isChecked) {
-					openKeyboardSettings();						
-					if (deadHandDialog != null) deadHandDialog.dismiss();
+					openKeyboardSettings();		
+					switchDH.setChecked(false);	
+					if (deadHandDialog != null) deadHandDialog.dismiss();						
 					return;	
 					}
 				}			
