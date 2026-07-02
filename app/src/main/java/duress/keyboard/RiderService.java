@@ -65,6 +65,11 @@ public class RiderService extends Service {
 
 	@Override
 	public void onDestroy() {
+	if (userPresentRunnable != null) {
+        userPresentHandler.removeCallbacks(userPresentRunnable);
+        userPresentRunnable = null;        
+    }
+	
     if (powerReceiver != null) {
         unregisterReceiver(powerReceiver);
         powerReceiver = null;
