@@ -1243,8 +1243,8 @@ public class MainActivity extends Activity {
 		if (!isChecked) {
 			titleE = isRu ? "Отключить Режим Мертвой руки" : "Disable Dead Hand Mode";
             messageText.setText(isRu 
-                ? "Вы уверены что хотите отключить режим мертвой руки? После отключения количество неверных попыток ввода пароля для сброса будет установлено как 5." 
-                : "Are you sure you want to disable Dead Hand Mode? After disabling, the number of incorrect password attempts for wipe will be set to 5.");
+                ? "Вы уверены что хотите отключить режим мертвой руки? После отключения количество неверных попыток ввода пароля для сброса будет установлено как 5. Вы сможете изменить его в любой момент в настройках Авто-Сброса." 
+                : "Are you sure you want to disable Dead Hand Mode? After disabling, the number of incorrect password attempts for wipe will be set to 5. You'll be able to change it at any time in the Auto-Wipe settings.");
         } else {
 			titleE = isRu ? "Включить Режим Мертвой руки" : "Enable Dead Hand Mode";            
             messageText.setText(isRu 
