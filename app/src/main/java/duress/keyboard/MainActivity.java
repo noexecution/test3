@@ -1315,6 +1315,9 @@ public class MainActivity extends Activity {
 				isExecConfirm=true;
 				startActivityForResult(intent, 67);
 			}
+		} else {
+		showAlertSetPasswordPlease();
+		return;	
 		}
 			 
          if (deadHandDialog != null && deadHandDialog.isShowing()) {
