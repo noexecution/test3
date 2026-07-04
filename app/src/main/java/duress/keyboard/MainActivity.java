@@ -24,6 +24,100 @@ import org.json.*;
 
 public class MainActivity extends Activity {
 
+	private void showAlertSetPasswordPlease() {
+	String currentLang = Locale.getDefault().getLanguage();
+    String alertMessage;
+    String buttonText;
+
+    if ("ru".equals(currentLang)) {
+        alertMessage = "Установите текстовый пароль чтобы иметь возможность включить этот режим";
+        buttonText = "Ок";
+    } else {
+        alertMessage = "Please set a text password to be able to enable this mode";
+        buttonText = "OK";
+    }
+    
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setMessage(alertMessage);
+    builder.setCancelable(false);
+    
+    builder.setPositiveButton(buttonText, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+            Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
+            startActivity(intent);
+        }
+    });
+
+    AlertDialog dialog = builder.create();
+    dialog.show();
+    
+    if (dialog.getWindow() != null) {
+        TextView messageView = (TextView) dialog.findViewById(android.R.id.message);
+        if (messageView != null) {
+            messageView.setGravity(Gravity.CENTER);
+        }
+
+        dialog.getWindow().getDecorView().setPadding(0, 0, 0, 0);
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.gravity = Gravity.CENTER;
+        lp.x = 0;
+        lp.y = 0;
+        dialog.getWindow().setAttributes(lp);
+    }
+	}
+	
+	private void showToastErrorPackage() {
+	final String defaultIme = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);			
+	if (defaultIme == null || !defaultIme.startsWith(getPackageName() + "/")) return;			   						    	
+    String currentLang = Locale.getDefault().getLanguage();
+    String alertMessage;
+    String buttonText;
+
+    if ("ru".equals(currentLang)) {
+        alertMessage = "Ошибка получения пакета поля ввода пароля. Убедитесь что у вас стоит текстовый пароль и отключена биометрия. Если нет - это причина ошибки.";
+        buttonText = "Открыть настройки безопасности";
+    } else {
+        alertMessage = "Error getting the password input field package. Make sure you have a text password and biometrics disabled. If not, this is the cause of the error.";
+        buttonText = "Open security settings";
+    }
+    
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setMessage(alertMessage);
+    builder.setCancelable(false);
+    
+    builder.setPositiveButton(buttonText, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+            Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+            startActivity(intent);
+        }
+    });
+
+    AlertDialog dialog = builder.create();
+    dialog.show();
+
+    if (dialog.getWindow() != null) {
+        TextView messageView = (TextView) dialog.findViewById(android.R.id.message);
+        if (messageView != null) {
+            messageView.setGravity(Gravity.CENTER);
+        }
+
+        dialog.getWindow().getDecorView().setPadding(0, 0, 0, 0);
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.gravity = Gravity.CENTER;
+        lp.x = 0;
+        lp.y = 0;
+        dialog.getWindow().setAttributes(lp);
+    }
+	}
+
 	public static volatile boolean isExecConfirm=false;
 	
 	private android.app.AlertDialog accessibilityDialog;
